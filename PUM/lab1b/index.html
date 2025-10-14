@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <canvas id="myCanvas" width="800" height="600">
+            <script>
+                var green = 0;
+                var vel = 1;
+                function colorGradient(context) {
+                    context.fillStyle= `rgb(0,${green},${255 - green})`;
+                    if (green > 255 || green < 0) 
+                        vel = -vel;
+                    green += vel;
+                }
+
+                var colorBool = true;
+                function colorChange(context) {
+                    context.fillStyle = colorBool ? "blue" : "green";
+                    colorBool = !colorBool;
+                }
+
+                const radius = 40;
+                function drawCircle(ctx, posX, posY, colorFunction) {
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(posX, posY, radius, 0, 2 * Math.PI);
+                    colorFunction(ctx);
+                    ctx.fill();
+                    ctx.stroke();
+                }
+
+                var frame = 0;
+                function getYmov() {
+                    var y = Math.pow(Math.sin(frame), 2);
+                    frame += 1;
+                    return y;
+                }
+
+                var canvas = document.getElementById("myCanvas");
+                var ctx = canvas.getContext("2d");
+                function intervalFunctionsFast() {
+                    ctx.clearRect(canvas.clientWidth / 2 - 2 * radius, 0, canvas.clientWidth / 2 - radius, canvas.clientHeight);
+                    drawCircle(ctx, canvas.clientWidth / 2 + canvas.clientWidth / 4, getYmov() * canvas.clientHeight / 2, colorGradient);
+                    drawCircle(ctx, canvas.clientWidth / 2, canvas.clientHeight / 2, colorGradient);
+                }
+
+                function intervalFunctionsSlow() {
+                    drawCircle(ctx, canvas.clientWidth / 4, canvas.clientHeight / 2, colorChange);
+                }
+                setInterval(intervalFunctionsFast, 10);
+                setInterval(intervalFunctionsSlow, 1000);
+            </script>
+        </canvas>
+    </body>
+</html>

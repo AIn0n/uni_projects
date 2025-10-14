@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <canvas id="myCanvas" width="800" height="600">
+            <script>
+                var canvas = document.getElementById("myCanvas");
+                var ctx = canvas.getContext("2d");
+
+                var playerPosition = canvas.clientWidth / 2;
+                const velocity = 30;
+                const playerSize = 20;
+                var ballX, ballY, bulletX, bulletY, bulletInMove = false;
+                const bulletRadius = 10, ballRadius = 20;
+                function drawPlayer(size, ctx)
+                {
+                    ctx.beginPath();
+                    ctx.fillRect(playerPosition, canvas.clientHeight - size, size, size);
+                    ctx.fillStyle = "red";
+                    ctx.stroke();
+                    requestAnimationFrame(()=>{
+                        ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+                        drawPlayer(size, ctx);
+                    })
+                }
+
+                function detectCollisionOfBallAndBullet() {
+                    const bulletTop = bulletY - bulletRadius;
+                    const ballLeft = ballX - ballRadius;
+                    if( (ballY + ballRadius <= bulletTop
+                        && bulletTop <= ballY - ballRadius) &&
+                        (bulletX + bulletRadius <= ballLeft &&
+                        bulletX - bulletRadius <= bulletX - bulletRadius)) {
+                            bulletInMove = false;
+                            return true;
+                        }
+                        return false;
+                }
+
+                function drawBullet() {
+                    console.log("hello bullet");
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(bulletX, bulletY, bulletRadius, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.stroke();
+                    bulletY -= 1;
+                    if (bulletY < 0)
+                        bulletInMove = false;
+
+                    if (bulletInMove) {
+                        requestAnimationFrame(()=>{
+                            drawBullet();
+                        });                        
+                    }
+                }
+
+                function spawnBullet() {
+                    bulletX = playerPosition;
+                    bulletY = canvas.clientHeight;
+                    bulletInMove = true;
+                    requestAnimationFrame(()=>{
+                        drawBullet();
+                    })
+                }
+
+                function drawBall() {
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(ballX, ballY, ballRadius, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.stroke();
+                    ballY += 1;
+                    if (ballY > canvas.clientHeight) {
+                        spawnBall();
+                        console.log("hello");
+                    }
+                    requestAnimationFrame(()=>{
+                        drawBall();
+                    })
+                }
+                document.addEventListener('keydown', (event)=> {
+                    if (event.defaultPrevented) { return; }
+                    switch (event.key) {
+                        case "ArrowLeft":
+                            if (playerPosition - playerSize > 0) {
+                                playerPosition -= velocity;
+                            }
+                            break;
+                        case "ArrowRight":
+                            if (playerPosition + playerSize < canvas.clientWidth) {
+                                playerPosition += velocity;
+                            }
+                            break;
+                        case " ":
+                            if (!bulletInMove)
+                                    spawnBullet();
+                    }
+
+                    event.preventDefault();
+                }, true);
+
+                function spawnBall() {
+                    ballX = Math.floor(Math.random() * canvas.clientWidth);
+                    ballY = 0;
+                    ballInMove = true;
+                }
+
+                requestAnimationFrame(() => {
+                    spawnBall();
+                    drawPlayer(playerSize, ctx);
+                    drawBall(20);
+                });
+            </script>
+        </canvas>
+    </body>
+</html>

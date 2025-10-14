@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<body>
+<canvas id="c" width="800" height="600">
+<script>
+const canvas = document.getElementById("c");
+var ctx = canvas.getContext("2d");
+
+// road contants
+const segment_height = 40;
+const road_pos_y = canvas.clientHeight - segment_height;
+
+// player constants
+const player_height = 40;
+
+// player globals
+var player_pos_x = canvas.clientWidth / 8;
+var player_pos_y = road_pos_y - player_height;
+
+// jump contants
+var jump_max_height = 300;
+
+// jump globals
+var in_air = false;
+var jump_vel = 0;
+
+function draw_road(road_pos_x) {
+    const segment_width = 100;
+    const road_velocity = 3;
+    const num_of_segments = (canvas.clientWidth / segment_width) + 1;
+
+    ctx.fillStyle="white";
+    for (var i = 0; i < num_of_segments; ++i) {
+        ctx.fillStyle = (ctx.fillStyle == "#ffffff") ? "red" : "white";
+        ctx.fillRect(road_pos_x + (segment_width * i), road_pos_y, segment_width, segment_height);
+    }
+    if (road_pos_x <= -segment_width)
+        road_pos_x += segment_width * 2;
+    requestAnimationFrame(()=>{
+        draw_road(road_pos_x - road_velocity);
+    });
+}
+
+function draw_background() {
+    ctx.fillStyle = "blue";
+    ctx.fillRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+    requestAnimationFrame(()=>{
+        draw_background();
+    })
+}
+
+function draw_player() {
+    const player_width = 150;
+    ctx.fillStyle = "green";
+    ctx.fillRect(player_pos_x, player_pos_y, player_width, player_height);
+
+    if (in_air) {
+        player_pos_y += jump_vel;
+        if (player_pos_y <= jump_max_height) {
+            jump_vel = -jump_vel;
+        }
+        if (player_pos_y + player_height >= road_pos_y) {
+            jump_vel = 0
+            in_air = false;
+        }
+            
+    }
+
+    requestAnimationFrame(()=>{
+        draw_player();
+    })
+}
+
+function draw_obstacle() {
+    
+}
+
+document.addEventListener('keydown', (event)=> {
+    if (event.defaultPrevented) { return; }
+    switch (event.key) {
+        case " ":
+            if (!in_air) {
+                in_air = true;
+                jump_vel = -10;
+            }
+    }
+    event.preventDefault();
+}, true);
+
+requestAnimationFrame(()=>{
+    draw_background();
+    draw_road(0);
+    draw_player();
+});
+</script>
+</canvas>
+</body>
+</html>

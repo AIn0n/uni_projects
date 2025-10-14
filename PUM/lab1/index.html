@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <a href="https://github.com/AIn0n/PUM/blob/master/lab1/index.html">html</a>
+        <a href="https://github.com/AIn0n/PUM/blob/master/lab1/">kod</a>
+        <canvas id="myCanvas" width="800" height="600">
+            <script>
+                var canvas = document.getElementById("myCanvas");
+                var ctx = canvas.getContext("2d");
+
+                var boolean = true;
+                function changeColor() {
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(canvas.clientWidth / 2, canvas.clientHeight / 2 , 40, 0, 2 * Math.PI);
+                    ctx.fillStyle= boolean ? "green" : "blue";
+                    boolean = !boolean;
+                    ctx.fill();
+                    ctx.stroke();
+                }
+                setInterval(changeColor, 1000);
+            </script>
+        </canvas>
+    </body>
+</html>

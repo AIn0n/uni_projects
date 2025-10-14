@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<body>
+<canvas id="c" width="800" height="600">
+<script>
+const canvas = document.getElementById("c");
+var ctx = canvas.getContext("2d");
+
+// constants correlated to field size
+const segment_size = 40;
+const num_of_segments = 9
+// constants correlated strictly to drawing lines at playground
+const line_length = ((num_of_segments - 1) * segment_size);
+const segments_off_w = (canvas.clientWidth - line_length)/2;
+const segments_off_h = (canvas.clientHeight - line_length)/2;
+
+// stones related constants
+const stone_r = 20;
+
+// stones related variables
+var stones_cords = [{x: 1, y: 0, c: 'white'}];
+
+// player related vars
+var player = 'white';
+
+function find_nearest_point(point, offset) {
+    return Math.floor((point - offset) / segment_size) % num_of_segments;
+}
+
+function check_if_field_is_empty(x, y) {
+    for (const stone of stones_cords) {
+        if (stone.x == x && stone.y == y)
+            return false;
+    }
+    return true;
+}
+
+function check_if_field_exists(x, y) {
+     return (x <= num_of_segments && x >= 0 && y <= num_of_segments && y >= 0);
+}
+
+canvas.addEventListener('click', (event)=>{
+    const x = find_nearest_point(event.offsetX, segments_off_w);
+    const y = find_nearest_point(event.offsetY, segments_off_h);
+    if (check_if_field_exists(x, y) && check_if_field_is_empty(x, y)) {
+        stones_cords.push({x: x, y: y, c: player});
+        collect_neighbours({x: x, y: y, c: player}, []);
+        player = (player === 'white') ? 'black' : 'white';
+    }
+});
+
+function draw_stones()
+{
+    for (const stone of stones_cords) {
+        ctx.beginPath();
+        ctx.arc(
+            stone['x'] * segment_size + segments_off_w,
+            stone['y'] * segment_size + segments_off_h,
+            stone_r, 0, 2 * Math.PI, false);
+        ctx.fillStyle = stone['c'];
+        ctx.closePath();
+        ctx.fill();
+    }
+    requestAnimationFrame(()=> {
+        draw_stones();
+    })
+}
+
+function is_neighbour(s1, s2)
+{
+    return ((s1.x + 1 == s2.x || s1.x - 1 == s2.x) &&
+            (s1.y + 1 == s2.y || s1.y - 1 == s2.y) && (s1.c === s2.c));
+}
+
+function collect_neighbours(s, collector)
+{
+    for (const stone of stones_cords) {
+        if (is_neighbour(s, stone) && !collector.includes(stone)) {
+            collector.push(stone);
+            collect_neighbours(stone, collector);
+        }
+        console.log(collector[0] == s && collector.length > 3);
+        return (collector[0] == s && collector.length > 3);
+    }
+}
+
+function is_stone_in_circle(s)
+{
+    let checking = [s];
+    for (const stone of stones_cords)
+    {
+        for (const check of checking) {
+            if (is_neighbour(check, stone)) {
+                console.log("hello");
+                if (false) {
+                    console.log(checking);
+                    return checking
+                }
+            }
+        }
+    }
+}
+
+function draw_background()
+{
+    ctx.fillStyle = "#eba946";
+    ctx.fillRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+    ctx.fillStyle = player;
+    for (let i = 0; i < num_of_segments; ++i) {
+        ctx.beginPath();
+        ctx.moveTo(segments_off_w  + (i * segment_size), segments_off_h);
+        ctx.lineTo(segments_off_w  + (i * segment_size), segments_off_h + line_length);
+        ctx.closePath();
+        ctx.stroke();
+    }
+    for (let i = 0; i < num_of_segments; ++i) {
+        ctx.beginPath();
+        ctx.moveTo(segments_off_w, segments_off_h   + (i * segment_size));
+        ctx.lineTo(segments_off_w + line_length, segments_off_h + (i * segment_size));
+        ctx.closePath();
+        ctx.stroke();
+    }
+    requestAnimationFrame(()=> {
+        draw_background();
+    });
+}
+
+requestAnimationFrame(() => { 
+    draw_background();
+    draw_stones();
+});
+</script>
+</canvas>
+</body>
+</html>
